@@ -2,6 +2,7 @@ package com.kotlearn.minesweeperk.feature.play
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kotlearn.minesweeperk.domain.game.AddHighscoreUseCase
 import com.kotlearn.minesweeperk.domain.game.CreateGameUseCase
 import com.kotlearn.minesweeperk.domain.game.GameStatus
 import com.kotlearn.minesweeperk.domain.game.RevealTileUseCase
@@ -16,6 +17,7 @@ internal class PlayViewModel(
     private val createGameUseCase: CreateGameUseCase,
     private val revealTileUseCase: RevealTileUseCase,
     private val toggleFlagUseCase: ToggleFlagUseCase,
+    private val addHighscoreUseCase: AddHighscoreUseCase,
 ) : ViewModel() {
 
     private val _gameState = MutableStateFlow(createNewGame())
@@ -27,11 +29,17 @@ internal class PlayViewModel(
     private var timerJob: Job? = null
 
     fun revealTile(x: Int, y: Int) {
+        val previousStatus = _gameState.value.status
         _gameState.value = revealTileUseCase(_gameState.value, x, y)
         if (_gameState.value.status == GameStatus.PLAYING) {
             startTimerIfNeeded()
         } else {
             stopTimer()
+        }
+        if (previousStatus == GameStatus.PLAYING && _gameState.value.status == GameStatus.WON) {
+            viewModelScope.launch {
+                addHighscoreUseCase(timeSeconds = _elapsedSeconds.value)
+            }
         }
     }
 

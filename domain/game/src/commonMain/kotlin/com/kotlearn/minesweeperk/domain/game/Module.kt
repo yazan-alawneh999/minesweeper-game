@@ -12,5 +12,7 @@ val domainGameModule = module {
     factoryOf(::CreateGameUseCase)
     factoryOf(::RevealTileUseCase)
     factoryOf(::ToggleFlagUseCase)
+    factoryOf(::AddHighscoreUseCase)
+    factoryOf(::GetHighscoresAsFlowUseCase)
 
 }

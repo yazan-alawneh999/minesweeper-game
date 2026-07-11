@@ -1,7 +1,10 @@
 package com.kotlearn.minesweeperk
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.kotlearn.minesweeperk.feature.highscores.Highscores
@@ -28,24 +31,28 @@ fun App(
     ) {
         MaterialTheme {
             val navController = rememberNavController()
-            NavHost(
-                navController = navController,
-                startDestination = Menu,
-            ) {
-                menuRoutes(
-                    goToPlay = {
-                        navController.navigate(Play)
-                    },
-                    goToHighscores = {
-                        navController.navigate(Highscores)
-                    },
-                    goToSettings = {
-                        navController.navigate(Settings)
-                    },
-                )
-                playRoutes()
-                highscoresRoutes()
-                settingsRoutes()
+            Scaffold {
+
+                NavHost(
+                    navController = navController,
+                    startDestination = Menu,
+                    modifier = Modifier.padding(it)
+                ) {
+                    menuRoutes(
+                        goToPlay = {
+                            navController.navigate(Play)
+                        },
+                        goToHighscores = {
+                            navController.navigate(Highscores)
+                        },
+                        goToSettings = {
+                            navController.navigate(Settings)
+                        },
+                    )
+                    playRoutes()
+                    highscoresRoutes()
+                    settingsRoutes()
+                }
             }
         }
     }
