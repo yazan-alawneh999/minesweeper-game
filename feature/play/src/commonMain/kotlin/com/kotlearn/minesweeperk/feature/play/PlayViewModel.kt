@@ -7,6 +7,8 @@ import com.kotlearn.minesweeperk.domain.game.CreateGameUseCase
 import com.kotlearn.minesweeperk.domain.game.GameStatus
 import com.kotlearn.minesweeperk.domain.game.RevealTileUseCase
 import com.kotlearn.minesweeperk.domain.game.ToggleFlagUseCase
+import com.kotlearn.minesweeperk.domain.settings.Difficulty
+import com.kotlearn.minesweeperk.domain.settings.GetDifficultyAsFlowUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +20,10 @@ internal class PlayViewModel(
     private val revealTileUseCase: RevealTileUseCase,
     private val toggleFlagUseCase: ToggleFlagUseCase,
     private val addHighscoreUseCase: AddHighscoreUseCase,
+    private val getDifficultyAsFlowUseCase: GetDifficultyAsFlowUseCase,
 ) : ViewModel() {
+
+    private var difficulty: Difficulty = Difficulty.DEFAULT
 
     private val _gameState = MutableStateFlow(createNewGame())
     val gameState = _gameState.asStateFlow()
@@ -27,6 +32,17 @@ internal class PlayViewModel(
     val elapsedSeconds = _elapsedSeconds.asStateFlow()
 
     private var timerJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            getDifficultyAsFlowUseCase().collect { newDifficulty ->
+                if (newDifficulty != difficulty) {
+                    difficulty = newDifficulty
+                    restart()
+                }
+            }
+        }
+    }
 
     fun revealTile(x: Int, y: Int) {
         val previousStatus = _gameState.value.status
@@ -54,9 +70,9 @@ internal class PlayViewModel(
     }
 
     private fun createNewGame() = createGameUseCase(
-        width = BOARD_WIDTH,
-        height = BOARD_HEIGHT,
-        mineCount = MINE_COUNT,
+        width = difficulty.width,
+        height = difficulty.height,
+        mineCount = difficulty.mineCount,
     )
 
     private fun startTimerIfNeeded() {
@@ -74,10 +90,5 @@ internal class PlayViewModel(
         timerJob = null
     }
 
-    companion object {
-        private const val BOARD_WIDTH = 10
-        private const val BOARD_HEIGHT = 16
-        private const val MINE_COUNT = 25
-    }
 
 }
