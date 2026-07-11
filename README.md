@@ -1,8 +1,7 @@
 # MinesweeperK: A Compose Multiplatform Minesweeper Game
 
 Welcome to the **MinesweeperK** project! This repository accompanies
-the [Kotlearn YouTube series](https://www.youtube.com/watch?v=vS8XpdV-mvE&list=PL5GuNM-e28OX5DTcc1QZRHKozB71htnqJ),
-where we build a Minesweeper game using **Compose Multiplatform**. The game runs on **Android**,
+i build a Minesweeper game using **Compose Multiplatform**. The game runs on **Android**,
 **iOS**, and **desktop** platforms (Windows, macOS), following **clean architecture** and
 a **multi-module project structure**.
 
