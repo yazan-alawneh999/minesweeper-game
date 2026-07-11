@@ -11,6 +11,10 @@ kotlin {
             implementation(projects.data.settings)
         }
 
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+
     }
 
 }

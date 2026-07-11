@@ -8,6 +8,8 @@ import com.kotlearn.minesweeperk.feature.highscores.Highscores
 import com.kotlearn.minesweeperk.feature.highscores.highscoresRoutes
 import com.kotlearn.minesweeperk.feature.menu.Menu
 import com.kotlearn.minesweeperk.feature.menu.menuRoutes
+import com.kotlearn.minesweeperk.feature.play.Play
+import com.kotlearn.minesweeperk.feature.play.playRoutes
 import com.kotlearn.minesweeperk.feature.settings.Settings
 import com.kotlearn.minesweeperk.feature.settings.settingsRoutes
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -31,7 +33,9 @@ fun App(
                 startDestination = Menu,
             ) {
                 menuRoutes(
-                    goToPlay = {},
+                    goToPlay = {
+                        navController.navigate(Play)
+                    },
                     goToHighscores = {
                         navController.navigate(Highscores)
                     },
@@ -39,6 +43,7 @@ fun App(
                         navController.navigate(Settings)
                     },
                 )
+                playRoutes()
                 highscoresRoutes()
                 settingsRoutes()
             }

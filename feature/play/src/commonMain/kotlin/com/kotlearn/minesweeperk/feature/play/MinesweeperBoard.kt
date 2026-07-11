@@ -1,7 +1,9 @@
 package com.kotlearn.minesweeperk.feature.play
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -24,10 +26,13 @@ import minesweeperk.feature.play.generated.resources.mine
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MinesweeperBoard(
     tileStates: List<List<TileState>>,
     modifier: Modifier = Modifier,
+    onTileClick: (x: Int, y: Int) -> Unit = { _, _ -> },
+    onTileLongClick: (x: Int, y: Int) -> Unit = { _, _ -> },
     boardWidth: Int = tileStates.size,
     boardHeight: Int = tileStates.firstOrNull()?.size ?: 0,
     textStyle: TextStyle = TextStyle(),
@@ -75,6 +80,10 @@ fun MinesweeperBoard(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .weight(1f)
+                                    .combinedClickable(
+                                        onClick = { onTileClick(x, y) },
+                                        onLongClick = { onTileLongClick(x, y) },
+                                    )
                             )
                         }
                     }
