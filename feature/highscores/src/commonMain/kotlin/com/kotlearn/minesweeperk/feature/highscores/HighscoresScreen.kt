@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -191,7 +190,6 @@ private fun LiquidBlobs() {
         modifier = Modifier
             .size(320.dp)
             .offset(x = (-100).dp, y = (-60).dp)
-            .blur(60.dp)
             .background(
                 brush = Brush.radialGradient(
                     colors = listOf(GlassTheme.blobPurple, Color.Transparent),
@@ -203,7 +201,6 @@ private fun LiquidBlobs() {
         modifier = Modifier
             .size(280.dp)
             .offset(x = 220.dp, y = 380.dp)
-            .blur(60.dp)
             .background(
                 brush = Brush.radialGradient(
                     colors = listOf(GlassTheme.blobTeal, Color.Transparent),
@@ -215,7 +212,6 @@ private fun LiquidBlobs() {
         modifier = Modifier
             .size(260.dp)
             .offset(x = (-40).dp, y = 620.dp)
-            .blur(60.dp)
             .background(
                 brush = Brush.radialGradient(
                     colors = listOf(GlassTheme.blobPink, Color.Transparent),
