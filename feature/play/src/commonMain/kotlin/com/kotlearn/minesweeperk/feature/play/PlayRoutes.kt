@@ -10,12 +10,15 @@ import org.koin.compose.viewmodel.koinViewModel
 @Serializable
 data object Play
 
-fun NavGraphBuilder.playRoutes() {
+fun NavGraphBuilder.playRoutes(
+    onNavigateBack: () -> Unit,
+) {
 
     composable<Play> {
         val viewModel: PlayViewModel = koinViewModel()
         PlayScreen(
             viewModel = viewModel,
+            onNavigateBack = onNavigateBack,
             modifier = Modifier.fillMaxSize(),
         )
     }

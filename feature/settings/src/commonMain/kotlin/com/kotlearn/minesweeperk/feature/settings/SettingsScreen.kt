@@ -6,12 +6,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,10 +23,12 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -39,14 +43,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kotlearn.minesweeperk.domain.settings.Difficulty
+import com.kotlearn.minesweeperk.ui.core.LiquidGlass
 import com.kotlearn.minesweeperk.ui.core.LocalDimensions
 import com.kotlearn.minesweeperk.ui.core.LocalPadding
+import com.kotlearn.minesweeperk.ui.core.LocalSystemPaddingValue
+import com.kotlearn.minesweeperk.ui.core.glassContentColor
+import com.kotlearn.minesweeperk.ui.core.liquidGlass
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 internal fun SettingsScreen(
     viewModel: SettingsViewModel,
     modifier: Modifier = Modifier,
+    onNavigateBack: () -> Unit = {},
 ) {
     val username by viewModel.username.collectAsStateWithLifecycle()
     val difficulty by viewModel.difficulty.collectAsStateWithLifecycle()
@@ -60,6 +69,7 @@ internal fun SettingsScreen(
         onDifficultySelected = viewModel::setDifficulty,
         onSave = viewModel::save,
         modifier = modifier,
+        onNavigateBack = onNavigateBack,
     )
 }
 
@@ -72,13 +82,15 @@ private fun SettingsContent(
     onDifficultySelected: (Difficulty) -> Unit,
     onSave: () -> Unit,
     modifier: Modifier = Modifier,
+    onNavigateBack: () -> Unit = {},
 ) {
     val padding = LocalPadding.current
     val dimensions = LocalDimensions.current
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier.background(LiquidGlass.backgroundBrush),
+        modifier = modifier.background(LiquidGlass.backgroundBrush)
+           ,
     ) {
         CompositionLocalProvider(LocalContentColor provides glassContentColor) {
             Column(
@@ -90,12 +102,10 @@ private fun SettingsContent(
                     .widthIn(max = dimensions.maxWidthSmall)
                     .fillMaxWidth(),
             ) {
-                Text(
-                    text = "Settings",
-                    color = glassContentColor,
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                )
+
+                PlayToolbar(onNavigateBack = onNavigateBack)
+
+                Spacer(modifier = Modifier.height(padding.normal))
 
                 DifficultySection(
                     selectedDifficulty = selectedDifficulty,
@@ -108,6 +118,8 @@ private fun SettingsContent(
                     onUsernameChange = onUsernameChange,
                     onSave = onSave,
                 )
+
+                Spacer(modifier = Modifier.height(padding.large))
             }
         }
     }
@@ -164,7 +176,7 @@ private fun DifficultyOption(
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
-                text = "${difficulty.width} × ${difficulty.height} · ${difficulty.mineCount} mines",
+                text = "${difficulty.minePercent}% mines",
                 color = glassContentColor.copy(alpha = 0.75f),
                 fontSize = 13.sp,
             )
@@ -258,4 +270,43 @@ private fun SettingsContentPreview() {
         onSave = {},
         modifier = Modifier.fillMaxSize(),
     )
+}
+
+@Composable
+private fun PlayToolbar(
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+
+    val padding = LocalPadding.current
+    val shape = RoundedCornerShape(percent = 50)
+    Column {
+        Spacer(modifier = Modifier.height(LocalSystemPaddingValue.current.calculateTopPadding()))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = modifier.fillMaxWidth(),
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(shape)
+                    .liquidGlass(shape = shape)
+                    .clickable(onClick = onNavigateBack),
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = glassContentColor,
+                )
+            }
+            Spacer(modifier = Modifier.width(padding.normal))
+            Text(
+                text = "Minesweeper",
+                color = glassContentColor,
+                style = MaterialTheme.typography.h6,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+    }
 }

@@ -1,4 +1,4 @@
-package com.kotlearn.minesweeperk.feature.settings
+package com.kotlearn.minesweeperk.ui.core
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -69,5 +69,5 @@ fun Modifier.liquidGlass(
 }
 
 /** Convenience readable text color that sits well on top of glass surfaces. */
-internal val glassContentColor = Color.White.compositeOver(Color(0xFFEAF2FF))
+val glassContentColor: Color = Color.White.compositeOver(Color(0xFFEAF2FF))
 

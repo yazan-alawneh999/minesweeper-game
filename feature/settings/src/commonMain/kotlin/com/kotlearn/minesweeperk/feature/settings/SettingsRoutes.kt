@@ -10,13 +10,18 @@ import org.koin.compose.viewmodel.koinViewModel
 @Serializable
 data object Settings
 
-fun NavGraphBuilder.settingsRoutes() {
+fun NavGraphBuilder.settingsRoutes(
+    onNavigateBack: () -> Unit = {
+
+    },
+) {
 
     composable<Settings> {
         val viewModel: SettingsViewModel = koinViewModel()
         SettingsScreen(
             viewModel = viewModel,
             modifier = Modifier.fillMaxSize(),
+            onNavigateBack = onNavigateBack
         )
     }
 

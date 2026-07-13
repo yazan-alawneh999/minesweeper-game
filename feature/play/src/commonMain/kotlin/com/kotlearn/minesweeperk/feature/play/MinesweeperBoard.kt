@@ -43,15 +43,11 @@ fun MinesweeperBoard(
             modifier = modifier,
         ) {
 
-            val requiredRatio = boardWidth / boardHeight.toFloat()
-            val currentRatio = maxWidth / maxHeight
-            val tileLength = if (requiredRatio > currentRatio) {
-                // should fill width
-                maxWidth / boardWidth
-            } else {
-                // should fill height
-                maxHeight / boardHeight
-            }
+            val tileWidth = maxWidth / boardWidth
+            val tileHeight = maxHeight / boardHeight
+            // Keep tiles square (traditional Minesweeper look) by using the
+            // limiting dimension, then center the grid within the panel.
+            val tileLength = minOf(tileWidth, tileHeight)
             val sizeAdjustedTextStyle = textStyle.copy(
                 fontSize = tileLength.value.sp * 0.75f,
             )
@@ -66,7 +62,7 @@ fun MinesweeperBoard(
                         verticalArrangement = Arrangement.Center,
                         modifier = Modifier
                             .fillMaxHeight()
-                            .weight(1f)
+                            .width(tileLength)
                     ) {
                         for (y in tileStates[x].indices) {
                             val tileState = tileStates[x][y]
@@ -78,8 +74,7 @@ fun MinesweeperBoard(
                                 hiddenBorderWidth = hiddenBorderWidth,
                                 textStyle = sizeAdjustedTextStyle,
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f)
+                                    .size(tileLength)
                                     .combinedClickable(
                                         onClick = { onTileClick(x, y) },
                                         onLongClick = { onTileLongClick(x, y) },
@@ -127,7 +122,7 @@ private fun Tile(
                         imageVector = Icons.Filled.Flag,
                         contentDescription = null,
                         tint = LocalMinesweeperBoardColorScheme.current.flag,
-                        modifier = Modifier.fillMaxSize(fraction = 0.6f)
+                        modifier = Modifier.fillMaxSize(fraction = 0.85f)
                     )
                 }
             }
