@@ -122,7 +122,7 @@ private fun Tile(
                         imageVector = Icons.Filled.Flag,
                         contentDescription = null,
                         tint = LocalMinesweeperBoardColorScheme.current.flag,
-                        modifier = Modifier.fillMaxSize(fraction = 0.85f)
+                        modifier = Modifier.fillMaxSize(fraction = 0.65f)
                     )
                 }
             }
