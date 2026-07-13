@@ -13,4 +13,8 @@ val dataSettingsModule = module {
         bind<UsernameRepository>()
     }
 
+    singleOf(::DefaultDifficultyRepository) {
+        bind<DifficultyRepository>()
+    }
+
 }

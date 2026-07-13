@@ -11,4 +11,7 @@ val domainSettingsModule = module {
     factoryOf(::GetUsernameAsFlowUseCase)
     factoryOf(::UpdateUsernameUseCase)
 
+    factoryOf(::GetDifficultyAsFlowUseCase)
+    factoryOf(::UpdateDifficultyUseCase)
+
 }

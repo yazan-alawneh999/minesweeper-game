@@ -9,11 +9,16 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.ui.core)
             implementation(projects.domain.game)
+            implementation(projects.domain.settings)
 
             implementation(kotlin("test"))
         }
 
     }
+}
+
+dependencies {
+    debugImplementation(compose.uiTooling)
 }
 
 compose.resources {
