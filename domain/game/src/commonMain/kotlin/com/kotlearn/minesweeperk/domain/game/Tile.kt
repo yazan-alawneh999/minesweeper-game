@@ -1,5 +1,8 @@
 package com.kotlearn.minesweeperk.domain.game
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Tile(
     val isMine: Boolean = false,
     val isRevealed: Boolean = false,
