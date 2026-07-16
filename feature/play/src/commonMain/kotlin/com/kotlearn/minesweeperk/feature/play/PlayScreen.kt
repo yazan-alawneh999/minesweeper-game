@@ -100,6 +100,15 @@ internal fun PlayScreen(
                         )
                     }
                 }
+
+                if (state != null) {
+                    GameEndOverlay(
+                        status = state.status,
+                        elapsedSeconds = elapsedSeconds,
+                        onRestart = viewModel::restart,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
             }
         }
     }
