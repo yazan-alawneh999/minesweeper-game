@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlearn.domainModule)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -11,6 +12,7 @@ kotlin {
             implementation(projects.data.settings)
 
             implementation(libs.coroutines.core)
+            implementation(libs.kotlinx.serialization)
         }
 
         commonTest.dependencies {
