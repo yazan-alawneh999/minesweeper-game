@@ -33,8 +33,18 @@ class RevealTileUseCase {
         get() = tiles.any { column -> column.any { it.isMine } }
 
     private fun GameState.withMinesPlaced(safeX: Int, safeY: Int, random: Random): GameState {
-        val minePositions = allPositions()
-            .filterNot { it == safeX to safeY }
+        // Keep the tapped tile and its neighbours mine-free so the first reveal
+        // always has zero adjacent mines and flood-reveals an area. On boards too
+        // dense to spare the whole neighbourhood, fall back to only the tapped
+        // tile so it is at least never a mine.
+        val safeZone = (neighboursOf(safeX, safeY) + (safeX to safeY)).toSet()
+        val clearedNeighbourhood = allPositions().filterNot { it in safeZone }
+        val candidates = if (clearedNeighbourhood.size >= mineCount) {
+            clearedNeighbourhood
+        } else {
+            allPositions().filterNot { it == safeX to safeY }
+        }
+        val minePositions = candidates
             .shuffled(random)
             .take(mineCount)
             .toSet()
