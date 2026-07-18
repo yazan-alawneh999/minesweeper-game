@@ -172,6 +172,18 @@ internal class PlayViewModel(
         viewModelScope.launch { updateSoundEnabledUseCase(enabled) }
     }
 
+    /** Restores the customizable play settings (board size, icons, sound) to
+     *  their defaults. Difficulty and username live in the Settings screen and
+     *  are left untouched. */
+    fun resetToDefaults() {
+        viewModelScope.launch {
+            updateBoardSizeUseCase(BoardSize.DEFAULT)
+            updateFlagIconUseCase(FlagIcon.DEFAULT)
+            updateMineIconUseCase(MineIcon.DEFAULT)
+            updateSoundEnabledUseCase(true)
+        }
+    }
+
     private fun startNewGame() {
         val difficulty = difficulty ?: return
         val size = boardSize ?: return

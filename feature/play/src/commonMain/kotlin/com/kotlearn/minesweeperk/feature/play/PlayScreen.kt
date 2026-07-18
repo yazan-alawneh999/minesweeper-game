@@ -131,6 +131,7 @@ internal fun PlayScreen(
                 onFlagIconChange = viewModel::setFlagIcon,
                 onMineIconChange = viewModel::setMineIcon,
                 onSoundEnabledChange = viewModel::setSoundEnabled,
+                onReset = viewModel::resetToDefaults,
                 onDismiss = { showPanel = false },
                 modifier = Modifier.fillMaxSize(),
             )

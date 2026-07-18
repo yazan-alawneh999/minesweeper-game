@@ -41,6 +41,7 @@ internal fun QuickSettingsPanel(
     onFlagIconChange: (FlagIcon) -> Unit,
     onMineIconChange: (MineIcon) -> Unit,
     onSoundEnabledChange: (Boolean) -> Unit,
+    onReset: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -49,7 +50,7 @@ internal fun QuickSettingsPanel(
         contentAlignment = Alignment.BottomCenter,
         modifier = modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.5f))
+            .background(Color.Black.copy(alpha = 0.8f))
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -69,6 +70,17 @@ internal fun QuickSettingsPanel(
                 .liquidGlass(shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                 .padding(padding.large),
         ) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "Customize",
+                    color = glassContentColor,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    modifier = Modifier.weight(1f),
+                )
+                ResetButton(onClick = onReset)
+            }
+
             PanelLabel("Board size")
             BoardSizeStepper(boardSize = boardSize, onChange = onBoardSizeChange)
 
@@ -93,6 +105,21 @@ internal fun QuickSettingsPanel(
                 Switch(checked = soundEnabled, onCheckedChange = onSoundEnabledChange)
             }
         }
+    }
+}
+
+@Composable
+private fun ResetButton(onClick: () -> Unit) {
+    val shape = RoundedCornerShape(percent = 50)
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .clip(shape)
+            .liquidGlass(shape = shape, selected = true)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+    ) {
+        Text(text = "Reset", color = glassContentColor, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
     }
 }
 
