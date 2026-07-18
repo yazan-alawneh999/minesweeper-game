@@ -14,4 +14,12 @@ val domainSettingsModule = module {
     factoryOf(::GetDifficultyAsFlowUseCase)
     factoryOf(::UpdateDifficultyUseCase)
 
+    factoryOf(::GetBoardSizeAsFlowUseCase)
+    factoryOf(::UpdateBoardSizeUseCase)
+    factoryOf(::GetIconPreferencesAsFlowUseCase)
+    factoryOf(::UpdateFlagIconUseCase)
+    factoryOf(::UpdateMineIconUseCase)
+    factoryOf(::GetSoundEnabledAsFlowUseCase)
+    factoryOf(::UpdateSoundEnabledUseCase)
+
 }

@@ -5,6 +5,7 @@ package com.kotlearn.minesweeperk.domain.settings
  * clamps to [MIN_SIDE]..[MAX_SIDE] so a corrupt/persisted value can never
  * produce an unplayable board.
  */
+@ConsistentCopyVisibility
 data class BoardSize private constructor(
     val columns: Int,
     val rows: Int,
