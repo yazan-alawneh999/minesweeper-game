@@ -8,6 +8,7 @@ kotlin {
 
         commonMain.dependencies {
             implementation(projects.ui.core)
+            implementation(projects.core.audio)
             implementation(projects.domain.game)
             implementation(projects.domain.settings)
 

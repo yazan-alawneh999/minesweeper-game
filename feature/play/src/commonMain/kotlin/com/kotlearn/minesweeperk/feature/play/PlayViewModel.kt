@@ -3,6 +3,8 @@ package com.kotlearn.minesweeperk.feature.play
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kotlearn.minesweeperk.core.audio.GameSound
+import com.kotlearn.minesweeperk.core.audio.SoundPlayer
 import com.kotlearn.minesweeperk.domain.game.AddHighscoreUseCase
 import com.kotlearn.minesweeperk.domain.game.CreateGameUseCase
 import com.kotlearn.minesweeperk.domain.game.GameState
@@ -15,6 +17,7 @@ import com.kotlearn.minesweeperk.domain.settings.FlagIcon
 import com.kotlearn.minesweeperk.domain.settings.GetBoardSizeAsFlowUseCase
 import com.kotlearn.minesweeperk.domain.settings.GetDifficultyAsFlowUseCase
 import com.kotlearn.minesweeperk.domain.settings.GetIconPreferencesAsFlowUseCase
+import com.kotlearn.minesweeperk.domain.settings.GetSoundEnabledAsFlowUseCase
 import com.kotlearn.minesweeperk.domain.settings.IconPreferences
 import com.kotlearn.minesweeperk.domain.settings.MineIcon
 import kotlinx.coroutines.Job
@@ -36,6 +39,8 @@ internal class PlayViewModel(
     private val getDifficultyAsFlowUseCase: GetDifficultyAsFlowUseCase,
     private val getBoardSizeAsFlowUseCase: GetBoardSizeAsFlowUseCase,
     private val getIconPreferencesAsFlowUseCase: GetIconPreferencesAsFlowUseCase,
+    private val getSoundEnabledAsFlowUseCase: GetSoundEnabledAsFlowUseCase,
+    private val soundPlayer: SoundPlayer,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -65,6 +70,9 @@ internal class PlayViewModel(
             SharingStarted.WhileSubscribed(5_000),
             IconPreferences(flag = FlagIcon.DEFAULT, mine = MineIcon.DEFAULT),
         )
+
+    private val soundEnabled = getSoundEnabledAsFlowUseCase()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     private val _elapsedSeconds = MutableStateFlow(savedStateHandle[KEY_ELAPSED] ?: 0)
     val elapsedSeconds = _elapsedSeconds.asStateFlow()
@@ -105,6 +113,12 @@ internal class PlayViewModel(
         val previousStatus = current.status
         val newState = revealTileUseCase(current, x, y)
         setGameState(newState)
+        maybePlayTransitionSound(
+            player = soundPlayer,
+            enabled = soundEnabled.value,
+            from = previousStatus,
+            to = newState.status,
+        )
         if (newState.status == GameStatus.PLAYING) {
             startTimerIfNeeded()
         } else {
@@ -120,7 +134,11 @@ internal class PlayViewModel(
 
     fun toggleFlag(x: Int, y: Int) {
         val current = _gameState.value ?: return
-        setGameState(toggleFlagUseCase(current, x, y))
+        val newState = toggleFlagUseCase(current, x, y)
+        if (soundEnabled.value && newState.flagCount != current.flagCount) {
+            soundPlayer.play(GameSound.FLAG)
+        }
+        setGameState(newState)
     }
 
     fun restart() = startNewGame()
@@ -182,3 +200,18 @@ internal class PlayViewModel(
 /** Number of mines for [size] at [difficulty]'s density. */
 internal fun mineCountFor(size: BoardSize, difficulty: Difficulty): Int =
     difficulty.mineCountFor(tileCount = size.tileCount)
+
+/** Plays the sound for a status transition, if any, respecting [enabled]. */
+internal fun maybePlayTransitionSound(
+    player: SoundPlayer,
+    enabled: Boolean,
+    from: GameStatus,
+    to: GameStatus,
+) {
+    if (!enabled || from == to) return
+    when (to) {
+        GameStatus.LOST -> player.play(GameSound.EXPLOSION)
+        GameStatus.WON -> player.play(GameSound.WIN)
+        GameStatus.PLAYING -> Unit
+    }
+}
