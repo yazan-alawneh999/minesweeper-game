@@ -32,6 +32,7 @@ includeBuild("build-logic")
 
 include(":composeApp")
 include(":ui:core")
+include(":core:audio")
 include(":data:core")
 include(":data:game")
 include(":data:settings")
