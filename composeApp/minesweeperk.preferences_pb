@@ -4,7 +4,16 @@
 difficulty*EASY
 
 username*yazan
-
-	mine_icon*CLASSIC_DOT
-
-	flag_icon*MATERIAL_FILLED
+
+	mine_icon*SPIKED
+
+	flag_icon*
+BLACK_FLAG
+
+board_columns
+
+
+
+board_rows
+
+sound_enabled
