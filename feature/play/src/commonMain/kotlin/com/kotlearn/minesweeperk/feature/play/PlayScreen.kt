@@ -172,8 +172,18 @@ private fun ScoreBar(
     ) {
         CounterText(value = minesRemaining)
         RestartButton(status = status, onClick = onRestart)
-        CounterText(value = elapsedSeconds)
+        TimerText(elapsedSeconds = elapsedSeconds)
     }
+}
+
+@Composable
+private fun TimerText(elapsedSeconds: Int) {
+    Text(
+        text = formatElapsedTime(elapsedSeconds),
+        color = LocalMinesweeperBoardColorScheme.current.timerText,
+        fontWeight = FontWeight.Bold,
+        style = MaterialTheme.typography.h5,
+    )
 }
 
 @Composable
