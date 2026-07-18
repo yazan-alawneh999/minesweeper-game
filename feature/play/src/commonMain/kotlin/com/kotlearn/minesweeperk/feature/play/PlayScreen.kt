@@ -107,11 +107,11 @@ internal fun PlayScreen(
                     }
                 }
 
+                // Only celebrate a win. A loss just reveals the board (with the
+                // explosion) and the player restarts via the score-bar button —
+                // no blocking "You lost" dialog.
                 if (state != null && state.status == GameStatus.WON) {
                     FireworksOverlay(modifier = Modifier.fillMaxSize())
-                }
-
-                if (state != null) {
                     GameEndOverlay(
                         status = state.status,
                         elapsedSeconds = elapsedSeconds,
