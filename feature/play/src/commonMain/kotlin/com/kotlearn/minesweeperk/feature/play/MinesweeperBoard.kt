@@ -5,10 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Flag
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,9 +18,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import minesweeperk.feature.play.generated.resources.Res
-import minesweeperk.feature.play.generated.resources.mine
-import org.jetbrains.compose.resources.painterResource
+import com.kotlearn.minesweeperk.domain.settings.FlagIcon
+import com.kotlearn.minesweeperk.domain.settings.MineIcon
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -36,6 +32,8 @@ fun MinesweeperBoard(
     boardWidth: Int = tileStates.size,
     boardHeight: Int = tileStates.firstOrNull()?.size ?: 0,
     textStyle: TextStyle = TextStyle(),
+    flagIcon: FlagIcon = FlagIcon.DEFAULT,
+    mineIcon: MineIcon = MineIcon.DEFAULT,
 ) {
     if (tileStates.isNotEmpty()) {
         BoxWithConstraints(
@@ -73,6 +71,8 @@ fun MinesweeperBoard(
                                 revealedBorderWidth = revealedBorderWidth,
                                 hiddenBorderWidth = hiddenBorderWidth,
                                 textStyle = sizeAdjustedTextStyle,
+                                flagIcon = flagIcon,
+                                mineIcon = mineIcon,
                                 modifier = Modifier
                                     .size(tileLength)
                                     .combinedClickable(
@@ -96,6 +96,8 @@ private fun Tile(
     hiddenBorderWidth: Dp,
     modifier: Modifier = Modifier,
     textStyle: TextStyle = TextStyle(),
+    flagIcon: FlagIcon = FlagIcon.DEFAULT,
+    mineIcon: MineIcon = MineIcon.DEFAULT,
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -118,21 +120,21 @@ private fun Tile(
         when (state) {
             is TileState.Hidden -> {
                 if (state.flagged) {
-                    Icon(
-                        imageVector = Icons.Filled.Flag,
-                        contentDescription = null,
+                    FlagTileIcon(
+                        icon = flagIcon,
                         tint = LocalMinesweeperBoardColorScheme.current.flag,
-                        modifier = Modifier.fillMaxSize(fraction = 0.65f)
+                        emojiSize = textStyle.fontSize,
+                        modifier = Modifier.fillMaxSize(fraction = 0.65f),
                     )
                 }
             }
 
             TileState.Revealed.Mine -> {
-                Icon(
-                    painter = painterResource(Res.drawable.mine),
-                    contentDescription = null,
+                MineTileIcon(
+                    icon = mineIcon,
                     tint = LocalMinesweeperBoardColorScheme.current.mine,
-                    modifier = Modifier.fillMaxSize(fraction = 0.6f)
+                    emojiSize = textStyle.fontSize,
+                    modifier = Modifier.fillMaxSize(fraction = 0.6f),
                 )
             }
 
