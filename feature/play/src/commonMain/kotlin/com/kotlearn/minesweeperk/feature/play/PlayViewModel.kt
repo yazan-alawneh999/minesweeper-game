@@ -9,12 +9,21 @@ import com.kotlearn.minesweeperk.domain.game.GameState
 import com.kotlearn.minesweeperk.domain.game.GameStatus
 import com.kotlearn.minesweeperk.domain.game.RevealTileUseCase
 import com.kotlearn.minesweeperk.domain.game.ToggleFlagUseCase
+import com.kotlearn.minesweeperk.domain.settings.BoardSize
 import com.kotlearn.minesweeperk.domain.settings.Difficulty
+import com.kotlearn.minesweeperk.domain.settings.FlagIcon
+import com.kotlearn.minesweeperk.domain.settings.GetBoardSizeAsFlowUseCase
 import com.kotlearn.minesweeperk.domain.settings.GetDifficultyAsFlowUseCase
+import com.kotlearn.minesweeperk.domain.settings.GetIconPreferencesAsFlowUseCase
+import com.kotlearn.minesweeperk.domain.settings.IconPreferences
+import com.kotlearn.minesweeperk.domain.settings.MineIcon
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -25,6 +34,8 @@ internal class PlayViewModel(
     private val toggleFlagUseCase: ToggleFlagUseCase,
     private val addHighscoreUseCase: AddHighscoreUseCase,
     private val getDifficultyAsFlowUseCase: GetDifficultyAsFlowUseCase,
+    private val getBoardSizeAsFlowUseCase: GetBoardSizeAsFlowUseCase,
+    private val getIconPreferencesAsFlowUseCase: GetIconPreferencesAsFlowUseCase,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -35,15 +46,25 @@ internal class PlayViewModel(
     private var difficulty: Difficulty? =
         savedStateHandle.get<String>(KEY_DIFFICULTY)?.let { Difficulty.fromName(it) }
 
-    // Board dimensions are decided by the *first* measurement and then locked in
-    // for the life of the game, so rotating or resizing the window keeps the
-    // same board instead of resetting an in-progress game. Null until measured
-    // (or restored from a saved game).
-    private var columns: Int? = null
-    private var rows: Int? = null
+    // Board dimensions now come from the player's saved preference, not screen
+    // measurement. Restored from saved state so an in-progress game keeps its
+    // own dimensions and is never resized under the player.
+    private var boardSize: BoardSize? = savedStateHandle.get<String>(KEY_BOARD_SIZE)?.let {
+        val parts = it.split("x")
+        parts.getOrNull(0)?.toIntOrNull()?.let { c ->
+            parts.getOrNull(1)?.toIntOrNull()?.let { r -> BoardSize.of(c, r) }
+        }
+    }
 
     private val _gameState = MutableStateFlow(restoreGameState())
     val gameState = _gameState.asStateFlow()
+
+    val iconPreferences = getIconPreferencesAsFlowUseCase()
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            IconPreferences(flag = FlagIcon.DEFAULT, mine = MineIcon.DEFAULT),
+        )
 
     private val _elapsedSeconds = MutableStateFlow(savedStateHandle[KEY_ELAPSED] ?: 0)
     val elapsedSeconds = _elapsedSeconds.asStateFlow()
@@ -55,24 +76,27 @@ internal class PlayViewModel(
         // board is treated as already measured and is never restarted, and resume
         // the timer if the restored game was mid-play.
         _gameState.value?.let { restored ->
-            columns = restored.width
-            rows = restored.height
+            boardSize = BoardSize.of(columns = restored.width, rows = restored.height)
             if (restored.status == GameStatus.PLAYING && restored.hasStarted()) {
                 startTimerIfNeeded()
             }
         }
         viewModelScope.launch {
-            getDifficultyAsFlowUseCase().collect { newDifficulty ->
-                // Start a new game on the very first difficulty load, and restart
-                // only when the user genuinely changes difficulty — never on a
-                // process-death restore that re-emits the same value.
-                val difficultyChanged = difficulty != null && newDifficulty != difficulty
-                difficulty = newDifficulty
-                savedStateHandle[KEY_DIFFICULTY] = newDifficulty.name
-                if (_gameState.value == null || difficultyChanged) {
-                    startNewGame()
+            // Start a new game on the first load of difficulty + board size, and
+            // restart only when the user genuinely changes either — never on a
+            // process-death restore that re-emits the same values.
+            combine(getDifficultyAsFlowUseCase(), getBoardSizeAsFlowUseCase()) { d, s -> d to s }
+                .collect { (newDifficulty, newSize) ->
+                    val difficultyChanged = difficulty != null && newDifficulty != difficulty
+                    val sizeChanged = boardSize != null && newSize != boardSize
+                    difficulty = newDifficulty
+                    boardSize = newSize
+                    savedStateHandle[KEY_DIFFICULTY] = newDifficulty.name
+                    savedStateHandle[KEY_BOARD_SIZE] = "${newSize.columns}x${newSize.rows}"
+                    if (_gameState.value == null || difficultyChanged || sizeChanged) {
+                        startNewGame()
+                    }
                 }
-            }
         }
     }
 
@@ -99,31 +123,18 @@ internal class PlayViewModel(
         setGameState(toggleFlagUseCase(current, x, y))
     }
 
-    /**
-     * Reports how many tiles fit on screen. Only the first report sizes the
-     * board; later reports (e.g. from a rotation) are ignored so an in-progress
-     * game is never reset just because the available space changed.
-     */
-    fun onBoardMeasured(columns: Int, rows: Int) {
-        if (this.columns != null && this.rows != null) return
-        this.columns = columns
-        this.rows = rows
-        startNewGame()
-    }
-
     fun restart() = startNewGame()
 
     private fun startNewGame() {
         val difficulty = difficulty ?: return
-        val columns = columns ?: return
-        val rows = rows ?: return
+        val size = boardSize ?: return
         stopTimer()
         setElapsedSeconds(0)
         setGameState(
             createGameUseCase(
-                width = columns,
-                height = rows,
-                mineCount = difficulty.mineCountFor(tileCount = columns * rows),
+                width = size.columns,
+                height = size.rows,
+                mineCount = mineCountFor(size = size, difficulty = difficulty),
             )
         )
     }
@@ -163,6 +174,11 @@ internal class PlayViewModel(
         const val KEY_GAME = "game"
         const val KEY_ELAPSED = "elapsedSeconds"
         const val KEY_DIFFICULTY = "difficulty"
+        const val KEY_BOARD_SIZE = "boardSize"
     }
 
 }
+
+/** Number of mines for [size] at [difficulty]'s density. */
+internal fun mineCountFor(size: BoardSize, difficulty: Difficulty): Int =
+    difficulty.mineCountFor(tileCount = size.tileCount)
