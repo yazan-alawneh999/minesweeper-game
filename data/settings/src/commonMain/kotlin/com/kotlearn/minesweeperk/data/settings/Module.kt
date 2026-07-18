@@ -17,4 +17,16 @@ val dataSettingsModule = module {
         bind<DifficultyRepository>()
     }
 
+    singleOf(::DefaultBoardSizeRepository) {
+        bind<BoardSizeRepository>()
+    }
+
+    singleOf(::DefaultIconPreferencesRepository) {
+        bind<IconPreferencesRepository>()
+    }
+
+    singleOf(::DefaultSoundPreferencesRepository) {
+        bind<SoundPreferencesRepository>()
+    }
+
 }
