@@ -23,6 +23,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,13 +50,16 @@ internal fun PlayScreen(
     val gameState by viewModel.gameState.collectAsStateWithLifecycle()
     val elapsedSeconds by viewModel.elapsedSeconds.collectAsStateWithLifecycle()
     val iconPreferences by viewModel.iconPreferences.collectAsStateWithLifecycle()
+    val boardSize by viewModel.boardSizeState.collectAsStateWithLifecycle()
+    val soundEnabled by viewModel.soundEnabledState.collectAsStateWithLifecycle()
+    var showPanel by rememberSaveable { mutableStateOf(false) }
 
     val padding = LocalPadding.current
 
     Box(modifier = modifier.background(LiquidGlass.backgroundBrush)) {
-        // The board is only drawn once the game exists (after the difficulty
-        // has loaded and the board has been measured), but the layout is always
-        // present so measuring can happen and nothing jumps when it appears.
+        // The board is only drawn once the game exists (after the difficulty and
+        // board-size preferences have loaded), but the layout is always present
+        // so nothing jumps when it appears.
         val state = gameState
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -61,7 +67,10 @@ internal fun PlayScreen(
                 .safeDrawingPadding()
                 .padding(padding.normal),
         ) {
-            PlayToolbar(onNavigateBack = onNavigateBack)
+            PlayToolbar(
+                onNavigateBack = onNavigateBack,
+                onOpenSettings = { showPanel = true },
+            )
 
             Spacer(modifier = Modifier.height(padding.normal))
 
@@ -111,19 +120,35 @@ internal fun PlayScreen(
                 }
             }
         }
+
+        if (showPanel) {
+            QuickSettingsPanel(
+                boardSize = boardSize,
+                flagIcon = iconPreferences.flag,
+                mineIcon = iconPreferences.mine,
+                soundEnabled = soundEnabled,
+                onBoardSizeChange = viewModel::setBoardSize,
+                onFlagIconChange = viewModel::setFlagIcon,
+                onMineIconChange = viewModel::setMineIcon,
+                onSoundEnabledChange = viewModel::setSoundEnabled,
+                onDismiss = { showPanel = false },
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
     }
 }
 
 @Composable
 private fun PlayToolbar(
     onNavigateBack: () -> Unit,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
 
     val padding = LocalPadding.current
     val shape = RoundedCornerShape(percent = 50)
     Column {
-Spacer(modifier = Modifier.height(LocalSystemPaddingValue.current.calculateTopPadding()))
+        Spacer(modifier = Modifier.height(LocalSystemPaddingValue.current.calculateTopPadding()))
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = modifier.fillMaxWidth(),
@@ -149,6 +174,17 @@ Spacer(modifier = Modifier.height(LocalSystemPaddingValue.current.calculateTopPa
                 style = MaterialTheme.typography.h6,
                 fontWeight = FontWeight.Bold,
             )
+            Spacer(modifier = Modifier.weight(1f))
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(shape)
+                    .liquidGlass(shape = shape)
+                    .clickable(onClick = onOpenSettings),
+            ) {
+                Text(text = "⚙️", fontSize = 22.sp)
+            }
         }
     }
 }
