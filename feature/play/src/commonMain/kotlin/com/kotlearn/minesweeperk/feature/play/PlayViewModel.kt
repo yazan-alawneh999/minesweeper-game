@@ -20,6 +20,10 @@ import com.kotlearn.minesweeperk.domain.settings.GetIconPreferencesAsFlowUseCase
 import com.kotlearn.minesweeperk.domain.settings.GetSoundEnabledAsFlowUseCase
 import com.kotlearn.minesweeperk.domain.settings.IconPreferences
 import com.kotlearn.minesweeperk.domain.settings.MineIcon
+import com.kotlearn.minesweeperk.domain.settings.UpdateBoardSizeUseCase
+import com.kotlearn.minesweeperk.domain.settings.UpdateFlagIconUseCase
+import com.kotlearn.minesweeperk.domain.settings.UpdateMineIconUseCase
+import com.kotlearn.minesweeperk.domain.settings.UpdateSoundEnabledUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +44,10 @@ internal class PlayViewModel(
     private val getBoardSizeAsFlowUseCase: GetBoardSizeAsFlowUseCase,
     private val getIconPreferencesAsFlowUseCase: GetIconPreferencesAsFlowUseCase,
     private val getSoundEnabledAsFlowUseCase: GetSoundEnabledAsFlowUseCase,
+    private val updateBoardSizeUseCase: UpdateBoardSizeUseCase,
+    private val updateFlagIconUseCase: UpdateFlagIconUseCase,
+    private val updateMineIconUseCase: UpdateMineIconUseCase,
+    private val updateSoundEnabledUseCase: UpdateSoundEnabledUseCase,
     private val soundPlayer: SoundPlayer,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -73,6 +81,11 @@ internal class PlayViewModel(
 
     private val soundEnabled = getSoundEnabledAsFlowUseCase()
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    // Exposed for the inline quick-settings panel.
+    val boardSizeState = getBoardSizeAsFlowUseCase()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), BoardSize.DEFAULT)
+    val soundEnabledState = soundEnabled
 
     private val _elapsedSeconds = MutableStateFlow(savedStateHandle[KEY_ELAPSED] ?: 0)
     val elapsedSeconds = _elapsedSeconds.asStateFlow()
@@ -142,6 +155,22 @@ internal class PlayViewModel(
     }
 
     fun restart() = startNewGame()
+
+    fun setBoardSize(columns: Int, rows: Int) {
+        viewModelScope.launch { updateBoardSizeUseCase(BoardSize.of(columns, rows)) }
+    }
+
+    fun setFlagIcon(icon: FlagIcon) {
+        viewModelScope.launch { updateFlagIconUseCase(icon) }
+    }
+
+    fun setMineIcon(icon: MineIcon) {
+        viewModelScope.launch { updateMineIconUseCase(icon) }
+    }
+
+    fun setSoundEnabled(enabled: Boolean) {
+        viewModelScope.launch { updateSoundEnabledUseCase(enabled) }
+    }
 
     private fun startNewGame() {
         val difficulty = difficulty ?: return
