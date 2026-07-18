@@ -87,8 +87,9 @@ internal class PlayViewModel(
             stopTimer()
         }
         if (previousStatus == GameStatus.PLAYING && newState.status == GameStatus.WON) {
+            val difficulty = difficulty ?: return
             viewModelScope.launch {
-                addHighscoreUseCase(timeSeconds = _elapsedSeconds.value)
+                addHighscoreUseCase(timeSeconds = _elapsedSeconds.value, difficulty = difficulty)
             }
         }
     }

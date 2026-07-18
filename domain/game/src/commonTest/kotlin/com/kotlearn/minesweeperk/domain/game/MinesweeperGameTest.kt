@@ -36,6 +36,39 @@ class MinesweeperGameTest {
     }
 
     @Test
+    fun firstRevealKeepsNeighboursMineFreeSoItOpensAnArea() {
+        for (seed in 0..49) {
+            val gameState = createGameUseCase(width = 9, height = 9, mineCount = 40)
+            val revealedState = revealTileUseCase(gameState, x = 4, y = 4, random = Random(seed))
+
+            // The tapped tile and all eight neighbours must be mine-free...
+            for (dx in -1..1) {
+                for (dy in -1..1) {
+                    assertFalse(
+                        revealedState.tiles[4 + dx][4 + dy].isMine,
+                        "Tile (${4 + dx}, ${4 + dy}) should be mine-free on first reveal (seed $seed)",
+                    )
+                }
+            }
+            // ...so the first tap always has zero adjacent mines and flood-reveals an area.
+            assertEquals(0, revealedState.tiles[4][4].adjacentMines)
+            assertTrue(revealedState.tiles.sumOf { column -> column.count { it.isRevealed } } > 1)
+            assertEquals(40, revealedState.tiles.sumOf { column -> column.count { it.isMine } })
+        }
+    }
+
+    @Test
+    fun firstRevealFallsBackToSingleSafeTileWhenBoardIsTooDense() {
+        // 3x3 with 8 mines leaves only one safe tile, so the whole neighbourhood
+        // cannot be cleared; the tapped tile must still never be a mine.
+        val gameState = createGameUseCase(width = 3, height = 3, mineCount = 8)
+        val revealedState = revealTileUseCase(gameState, x = 1, y = 1, random = Random(0))
+
+        assertFalse(revealedState.tiles[1][1].isMine)
+        assertEquals(8, revealedState.tiles.sumOf { column -> column.count { it.isMine } })
+    }
+
+    @Test
     fun revealingNumberTileRevealsOnlyThatTile() {
         val gameState = buildGameState(width = 3, height = 3, minePositions = setOf(0 to 0))
 

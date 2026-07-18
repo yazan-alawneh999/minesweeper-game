@@ -15,9 +15,10 @@ internal class DefaultHighscoreRepository(
 
     override suspend fun addHighscore(highscore: Highscore) {
         val currentHighscores = storage.get(HighscoreRepository.HighscoresKey)?.let { decode(it) }.orEmpty()
-        val updatedHighscores = (currentHighscores + highscore)
-            .sortedBy { it.timeSeconds }
-            .take(MAX_HIGHSCORES)
+        val updatedHighscores = highscoresCappedPerDifficulty(
+            scores = currentHighscores + highscore,
+            maxPerDifficulty = MAX_HIGHSCORES_PER_DIFFICULTY,
+        )
         storage.writeValue(HighscoreRepository.HighscoresKey, Json.encodeToString(updatedHighscores))
     }
 
@@ -28,7 +29,21 @@ internal class DefaultHighscoreRepository(
     }
 
     companion object {
-        private const val MAX_HIGHSCORES = 10
+        private const val MAX_HIGHSCORES_PER_DIFFICULTY = 10
     }
 
 }
+
+/**
+ * Keeps only the [maxPerDifficulty] fastest scores for each difficulty, so a
+ * great time on a hard level is never crowded out by faster times from easier
+ * levels. Scores are compared within their own difficulty group.
+ */
+internal fun highscoresCappedPerDifficulty(
+    scores: List<Highscore>,
+    maxPerDifficulty: Int,
+): List<Highscore> = scores
+    .groupBy { it.difficulty }
+    .flatMap { (_, difficultyScores) ->
+        difficultyScores.sortedBy { it.timeSeconds }.take(maxPerDifficulty)
+    }

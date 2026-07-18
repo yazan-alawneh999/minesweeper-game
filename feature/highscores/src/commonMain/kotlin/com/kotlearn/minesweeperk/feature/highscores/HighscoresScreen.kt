@@ -2,6 +2,7 @@ package com.kotlearn.minesweeperk.feature.highscores
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kotlearn.minesweeperk.domain.game.Highscore
+import com.kotlearn.minesweeperk.domain.settings.Difficulty
 import com.kotlearn.minesweeperk.ui.core.LocalDimensions
 import com.kotlearn.minesweeperk.ui.core.LocalPadding
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -44,9 +46,12 @@ internal fun HighscoresScreen(
     modifier: Modifier = Modifier
 ) {
     val highscores by viewModel.highscores.collectAsStateWithLifecycle()
+    val selectedDifficulty by viewModel.selectedDifficulty.collectAsStateWithLifecycle()
 
     HighscoresContent(
         highscores = highscores,
+        selectedDifficulty = selectedDifficulty,
+        onDifficultySelected = viewModel::selectDifficulty,
         modifier = modifier,
     )
 }
@@ -54,6 +59,8 @@ internal fun HighscoresScreen(
 @Composable
 private fun HighscoresContent(
     highscores: List<Highscore>,
+    selectedDifficulty: Difficulty,
+    onDifficultySelected: (Difficulty) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier.background(GlassTheme.backgroundGradient)) {
@@ -74,6 +81,12 @@ private fun HighscoresContent(
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.h4,
                 modifier = Modifier.padding(vertical = LocalPadding.current.large)
+            )
+
+            DifficultySegmentedControl(
+                selected = selectedDifficulty,
+                onSelected = onDifficultySelected,
+                modifier = Modifier.padding(bottom = LocalPadding.current.normal),
             )
 
             if (highscores.isEmpty()) {
@@ -151,6 +164,45 @@ private fun HighscoreRow(
             style = MaterialTheme.typography.subtitle1,
         )
 
+    }
+}
+
+@Composable
+private fun DifficultySegmentedControl(
+    selected: Difficulty,
+    onSelected: (Difficulty) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val shape = RoundedCornerShape(percent = 50)
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = modifier
+            .widthIn(max = LocalDimensions.current.maxWidthSmall * 1.5f)
+            .fillMaxWidth()
+            .glass(shape = shape)
+            .padding(4.dp),
+    ) {
+        Difficulty.entries.forEach { difficulty ->
+            val isSelected = difficulty == selected
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(shape)
+                    .background(
+                        if (isSelected) Color.White.copy(alpha = 0.25f) else Color.Transparent,
+                    )
+                    .clickable { onSelected(difficulty) }
+                    .padding(vertical = LocalPadding.current.small),
+            ) {
+                Text(
+                    text = difficulty.label,
+                    color = if (isSelected) Color.White else Color.White.copy(alpha = 0.6f),
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                    style = MaterialTheme.typography.subtitle2,
+                )
+            }
+        }
     }
 }
 
@@ -269,11 +321,13 @@ private fun formatTime(timeSeconds: Int): String {
 fun HighscoresContentPreview() {
     HighscoresContent(
         highscores = listOf(
-            Highscore(username = "Yazan", timeSeconds = 42),
-            Highscore(username = "Anonymous", timeSeconds = 61),
-            Highscore(username = "Player 3", timeSeconds = 95),
-            Highscore(username = "Player 4", timeSeconds = 128),
+            Highscore(username = "Yazan", timeSeconds = 42, difficulty = Difficulty.EASY),
+            Highscore(username = "Anonymous", timeSeconds = 61, difficulty = Difficulty.EASY),
+            Highscore(username = "Player 3", timeSeconds = 95, difficulty = Difficulty.EASY),
+            Highscore(username = "Player 4", timeSeconds = 128, difficulty = Difficulty.EASY),
         ),
+        selectedDifficulty = Difficulty.EASY,
+        onDifficultySelected = {},
         modifier = Modifier.fillMaxSize(),
     )
 }
@@ -283,6 +337,8 @@ fun HighscoresContentPreview() {
 fun HighscoresContentEmptyPreview() {
     HighscoresContent(
         highscores = emptyList(),
+        selectedDifficulty = Difficulty.EASY,
+        onDifficultySelected = {},
         modifier = Modifier.fillMaxSize(),
     )
 }
