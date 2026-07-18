@@ -22,7 +22,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +46,7 @@ internal fun PlayScreen(
 ) {
     val gameState by viewModel.gameState.collectAsStateWithLifecycle()
     val elapsedSeconds by viewModel.elapsedSeconds.collectAsStateWithLifecycle()
+    val iconPreferences by viewModel.iconPreferences.collectAsStateWithLifecycle()
 
     val padding = LocalPadding.current
 
@@ -83,19 +83,15 @@ internal fun PlayScreen(
                     .padding(padding.normal),
             ) {
                 BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                    // Fill the available space with ~40dp square tiles; the tile
-                    // count (and therefore the mine count) follows the screen.
-                    val targetTileSize = 40.dp
-                    val columns = (maxWidth.value / targetTileSize.value).toInt().coerceAtLeast(1)
-                    val rows = (maxHeight.value / targetTileSize.value).toInt().coerceAtLeast(1)
-                    LaunchedEffect(columns, rows) {
-                        viewModel.onBoardMeasured(columns = columns, rows = rows)
-                    }
+                    // Board dimensions come from the saved BoardSize preference;
+                    // the board scales to fit this area.
                     if (state != null) {
                         MinesweeperBoard(
                             tileStates = state.toTileStates(),
                             onTileClick = viewModel::revealTile,
                             onTileLongClick = viewModel::toggleFlag,
+                            flagIcon = iconPreferences.flag,
+                            mineIcon = iconPreferences.mine,
                             modifier = Modifier.fillMaxSize(),
                         )
                     }
