@@ -89,7 +89,7 @@ internal fun QuickSettingsPanel(
                 options = FlagIcon.entries,
                 selected = flagIcon,
                 onSelect = onFlagIconChange,
-                render = { FlagTileIcon(icon = it, tint = Color(0xFFEB392A), emojiSize = 22.sp) },
+                render = { FlagTileIcon(icon = it, tint = Color(0xFFEB392A)) },
             )
 
             PanelLabel("Mine icon")
@@ -97,7 +97,7 @@ internal fun QuickSettingsPanel(
                 options = MineIcon.entries,
                 selected = mineIcon,
                 onSelect = onMineIconChange,
-                render = { MineTileIcon(icon = it, tint = glassContentColor, emojiSize = 22.sp) },
+                render = { MineTileIcon(icon = it, tint = glassContentColor) },
             )
 
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {

@@ -123,7 +123,6 @@ private fun Tile(
                     FlagTileIcon(
                         icon = flagIcon,
                         tint = LocalMinesweeperBoardColorScheme.current.flag,
-                        emojiSize = textStyle.fontSize,
                         modifier = Modifier.fillMaxSize(fraction = 0.65f),
                     )
                 }
@@ -133,7 +132,6 @@ private fun Tile(
                 MineTileIcon(
                     icon = mineIcon,
                     tint = LocalMinesweeperBoardColorScheme.current.mine,
-                    emojiSize = textStyle.fontSize,
                     modifier = Modifier.fillMaxSize(fraction = 0.6f),
                 )
             }

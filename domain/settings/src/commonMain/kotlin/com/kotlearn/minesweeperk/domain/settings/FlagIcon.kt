@@ -13,7 +13,8 @@ enum class FlagIcon(val emoji: String?) {
     MATERIAL_OUTLINED(emoji = null);
 
     companion object {
-        val DEFAULT = RED_FLAG
+        // Matches the flag shown before this feature (Material filled flag).
+        val DEFAULT = MATERIAL_FILLED
         fun fromName(name: String?): FlagIcon =
             entries.firstOrNull { it.name == name } ?: DEFAULT
     }

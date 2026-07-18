@@ -12,7 +12,8 @@ enum class MineIcon(val emoji: String?) {
     SPIKED(emoji = null);
 
     companion object {
-        val DEFAULT = BOMB
+        // Matches the mine shown before this feature (the bundled spiked drawable).
+        val DEFAULT = SPIKED
         fun fromName(name: String?): MineIcon =
             entries.firstOrNull { it.name == name } ?: DEFAULT
     }

@@ -11,6 +11,6 @@ interface IconPreferencesRepository {
     suspend fun updateFlagIcon(name: String)
     suspend fun updateMineIcon(name: String)
 
-    data object FlagIconKey : Storage.Key.StringKey("flag_icon", "RED_FLAG")
-    data object MineIconKey : Storage.Key.StringKey("mine_icon", "BOMB")
+    data object FlagIconKey : Storage.Key.StringKey("flag_icon", "MATERIAL_FILLED")
+    data object MineIconKey : Storage.Key.StringKey("mine_icon", "SPIKED")
 }
