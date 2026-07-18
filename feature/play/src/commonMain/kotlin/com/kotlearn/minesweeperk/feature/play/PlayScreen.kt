@@ -97,6 +97,10 @@ internal fun PlayScreen(
                     }
                 }
 
+                if (state != null && state.status == GameStatus.WON) {
+                    FireworksOverlay(modifier = Modifier.fillMaxSize())
+                }
+
                 if (state != null) {
                     GameEndOverlay(
                         status = state.status,
